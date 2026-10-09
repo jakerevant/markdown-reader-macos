@@ -65,6 +65,15 @@ open -a "Markdown Reader" README.md
 - No footnotes, math or Mermaid diagrams.
 - The renderer covers everyday GitHub-flavoured Markdown, not every CommonMark edge case.
 
+## License
+
+Source-available under the **MIT License with the Commons Clause** (see [LICENSE](LICENSE)). In short:
+
+- **Allowed:** using the app privately and at work, in any company; reading, changing and sharing the code free of charge.
+- **Not allowed:** selling the software, or any product or service whose value comes entirely or substantially from it. That includes paid hosting, support or consulting around it.
+
+Because of the Commons Clause this is not an OSI-approved open-source license. For other terms, ask the author through GitHub.
+
 ## Contributing
 
 This repository does not accept outside pull requests. Issues and suggestions are welcome where enabled.
