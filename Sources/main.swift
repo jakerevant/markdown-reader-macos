@@ -9,8 +9,28 @@ enum Resources {
               let s = try? String(contentsOf: url, encoding: .utf8) else { return "" }
         return s
     }
-    static let script = text("render", "js")
-    static let style = text("style", "css")
+    static func vendor(_ file: String) -> String {
+        guard let url = Bundle.main.url(forResource: file, withExtension: nil, subdirectory: "vendor"),
+              let s = try? String(contentsOf: url, encoding: .utf8) else { return "" }
+        return s
+    }
+
+    /// Library scripts first, the renderer last; all injected by the app, never by the document.
+    static let scripts: [String] = [
+        "purify.min.js", "markdown-it.min.js", "markdown-it-footnote.min.js",
+        "highlight.min.js", "katex.min.js", "mermaid.min.js",
+    ].map(vendor) + [text("render", "js")]
+
+    static let style: String = {
+        let fonts = Bundle.main.resourceURL!.appendingPathComponent("vendor/fonts", isDirectory: true).absoluteString
+        let katex = vendor("katex.min.css").replacingOccurrences(of: "url(fonts/", with: "url(\(fonts)")
+        return [
+            katex,
+            vendor("hljs-github.min.css"),
+            "@media (prefers-color-scheme: dark) {\n" + vendor("hljs-github-dark.min.css") + "\n}",
+            text("style", "css"),
+        ].joined(separator: "\n")
+    }()
 }
 
 let markdownExtensions: Set<String> = ["md", "markdown", "mdown", "mkd", "mkdn", "mdwn", "mdtxt", "mdtext", "txt"]
@@ -48,7 +68,9 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, WKNa
 
         let config = WKWebViewConfiguration()
         let content = WKUserContentController()
-        content.addUserScript(WKUserScript(source: Resources.script, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        for script in Resources.scripts {
+            content.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        }
         config.userContentController = content
         config.preferences.isElementFullscreenEnabled = false
         webView = WKWebView(frame: .zero, configuration: config)
@@ -82,7 +104,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, WKNa
 
     private func loadPage() {
         let base = fileURL.deletingLastPathComponent().absoluteString
-        let csp = "default-src 'none'; img-src file: data: https: http:; style-src 'unsafe-inline'; script-src 'none'"
+        let csp = "default-src 'none'; img-src file: data: https: http:; font-src file: data:; style-src 'unsafe-inline'; script-src 'none'"
         let html = """
         <!doctype html><html><head><meta charset="utf-8">
         <meta http-equiv="Content-Security-Policy" content="\(csp)">

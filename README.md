@@ -2,11 +2,15 @@
 
 A tiny native macOS app that shows Markdown files as rendered pages, so you can read them and click or copy their links without opening a code editor.
 
-It is one Swift file plus a small renderer, built with the Xcode command-line tools. It has no third-party dependencies and makes no network requests of its own.
+It is one Swift file, a small renderer and a few bundled open-source libraries (see [third-party libraries](#third-party-libraries)). It builds with the Xcode command-line tools, needs no package manager and makes no network requests of its own: everything ships inside the app.
 
 ## Features
 
-- **GitHub-flavoured Markdown:** headings, emphasis, links (inline, reference and bare URLs), images, code spans and fenced code, nested and task lists, tables with alignment, blockquotes, GitHub alerts (`> [!NOTE]`, `> [!WARNING]`, …), horizontal rules, `<details>` blocks and YAML front matter (shown folded).
+- **Full CommonMark plus GitHub-flavoured Markdown,** parsed by markdown-it: tables with alignment, strikethrough, autolinked URLs, task lists, GitHub alerts (`> [!NOTE]`, `> [!WARNING]`, …), heading anchors, `<details>` blocks and YAML front matter (shown folded).
+- **Syntax highlighting:** 36 common languages via highlight.js (Bash, C, C++, C#, CSS, Go, Java, JavaScript, JSON, Kotlin, PHP, Python, Ruby, Rust, SQL, Swift, TypeScript, YAML, XML/HTML and more), with GitHub's colours in light and dark mode.
+- **Footnotes:** `text[^1]` and `[^1]: note`, with links back and forth.
+- **Math:** `$inline$`, `$$display$$` and fenced `math` blocks are rendered with KaTeX. Prices like "$5 and $10" stay plain text.
+- **Mermaid diagrams:** fenced `mermaid` blocks become diagrams (flowcharts, sequence, class, state, Gantt, pie, …). Diagram colours follow light and dark mode.
 - **Links go where you expect:** web links open in your browser; links to other Markdown files open in the reader, including `file.md#heading`; links to other files open in their default app; `path/to/file.ts:42` style links work; folders open in Finder. Right-click any link and choose **Copy Link**.
 - **Live reload:** the page re-renders when the file changes on disk, keeping your scroll position.
 - **Copy buttons** on code blocks.
@@ -19,10 +23,11 @@ It is one Swift file plus a small renderer, built with the Xcode command-line to
 
 Markdown files are treated as documents, not programs:
 
-- Raw HTML is shown as text, except a small allow-list of harmless inline tags (`<kbd>`, `<sub>`, `<sup>`, `<br>`, …) and `<details>`/`<summary>`.
-- `<script>` and event attributes never run. The page has a Content Security Policy with `script-src 'none'`; the renderer is injected by the app itself.
-- `javascript:` and non-image `data:` links are neutralised.
-- Remote images (`https:`) are loaded when a document references them.
+- **Raw HTML:** it is allowed, as in GitHub, but every page is sanitised with DOMPurify before it is shown. Scripts, event handlers (`onerror`, `onclick`, …), forms, `<style>` and `javascript:` links are removed.
+- **Content Security Policy:** the page has `script-src 'none'`. Only the libraries and the renderer that the app itself injects can run; nothing from a document can.
+- **Mermaid:** it runs in its `strict` security level, so diagram labels cannot carry HTML or clickable scripts.
+- **Math:** KaTeX runs with `trust` off, so `\href` and similar commands are inert.
+- **Images:** remote images (`https:`) are loaded when a document references them. Nothing else goes to the network.
 
 ## Requirements
 
@@ -53,21 +58,29 @@ open -a "Markdown Reader" README.md
 | Path | What it is |
 |---|---|
 | `Sources/main.swift` | The app: windows, menus, link handling, live reload |
-| `Resources/render.js` | The Markdown → HTML renderer (also usable in Node: `require('./Resources/render.js'); markdownToHtml(text)`) |
+| `Resources/render.js` | The renderer: markdown-it setup, the alert, task-list, anchor and math plugins, sanitising, math, highlighting and diagrams, find in page |
+| `Resources/vendor/` | The bundled libraries, their fonts and licenses |
 | `Resources/style.css` | Page styles for light and dark mode |
 | `Info.plist` | Bundle metadata and the Markdown document types |
 | `tools/icon.swift` | Draws the app icon at build time |
 | `build.sh` | Build, sign and install |
 
-## Limitations
+## Third-party libraries
 
-- No syntax highlighting in code blocks.
-- No footnotes, math or Mermaid diagrams.
-- The renderer covers everyday GitHub-flavoured Markdown, not every CommonMark edge case.
+Bundled, unmodified, in `Resources/vendor/` (versions and licenses in [`Resources/vendor/README.md`](Resources/vendor/README.md)):
+
+- markdown-it (MIT)
+- markdown-it-footnote (MIT)
+- highlight.js (BSD-3-Clause)
+- KaTeX (MIT)
+- Mermaid (MIT)
+- DOMPurify (Apache-2.0 or MPL-2.0)
+
+They make the app about 4 MB.
 
 ## License
 
-Source-available under the **MIT License with the Commons Clause** (see [LICENSE](LICENSE)). In short:
+Markdown Reader's own code is source-available under the **MIT License with the Commons Clause** (see [LICENSE](LICENSE)). The bundled libraries keep their own licenses. In short:
 
 - **Allowed:** using the app privately and at work, in any company; reading, changing and sharing the code free of charge.
 - **Not allowed:** selling the software, or any product or service whose value comes entirely or substantially from it. That includes paid hosting, support or consulting around it.

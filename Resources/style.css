@@ -193,3 +193,26 @@ details.front-matter code { background: none; padding: 0; }
 @media (max-width: 600px) {
   #content { padding: 22px 18px 64px; }
 }
+
+/* highlight.js inside our code blocks */
+.code pre code.hljs { display: inline; padding: 0; background: none; }
+
+/* math */
+.math.display { display: block; margin: 0 0 1em; overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; }
+div.math.display { text-align: center; }
+.katex { font-size: 1.08em; }
+.math-error { color: var(--caution); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+/* mermaid */
+.mermaid-wrap { margin: 0 0 1em; overflow-x: auto; text-align: center; }
+.mermaid-wrap svg { max-width: 100%; height: auto; }
+pre.mermaid { text-align: left; white-space: pre-wrap; padding: 14px 16px; background: var(--code-bg); border-radius: 8px; font: 0.84em/1.5 ui-monospace, "SF Mono", Menlo, monospace; }
+pre.mermaid.mermaid-error { border-left: 3px solid var(--caution); }
+
+/* footnotes */
+.footnote-ref a, a.footnote-backref { text-decoration: none; }
+.footnote-ref { font-size: 0.75em; }
+hr.footnotes-sep { margin-top: 2.4em; }
+section.footnotes { font-size: 0.9em; color: var(--muted); }
+section.footnotes ol { padding-left: 1.4em; }
+section.footnotes li p { margin: 0.2em 0; }

@@ -8,6 +8,7 @@ swiftc -O -swift-version 5 -target arm64-apple-macos13.0 -framework AppKit -fram
   Sources/main.swift -o "$APP/Contents/MacOS/MarkdownReader"
 cp Info.plist "$APP/Contents/Info.plist"
 cp Resources/render.js Resources/style.css "$APP/Contents/Resources/"
+cp -R Resources/vendor "$APP/Contents/Resources/vendor"
 swift tools/icon.swift build/icon-1024.png
 for s in 16 32 128 256 512; do
   sips -z $s $s build/icon-1024.png --out build/AppIcon.iconset/icon_${s}x${s}.png >/dev/null
